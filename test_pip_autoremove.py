@@ -1,4 +1,3 @@
-import pip
 import pkg_resources
 
 import pip_autoremove
@@ -14,16 +13,14 @@ def test_find_all_dead():
         'pip': set([]),
         'setuptools': set([]),
     }
-    start = set(["Flask"])
-    expected = set(
-        ["Flask", "Jinja2", "MarkupSafe", "Werkzeug", "itsdangerous"])
+    start = set(['Flask'])
+    expected = set(['Flask', 'Jinja2', 'MarkupSafe', 'Werkzeug', 'itsdangerous'])
     dead = pip_autoremove.find_all_dead(graph, start)
     assert dead == expected
 
 
 def install_dist(req):
-    pip.main(['install', req])
-    pip.logger.consumers = []
+    pip_autoremove.run_pip('install', req)
 
 
 def has_dist(req):
@@ -33,7 +30,7 @@ def has_dist(req):
 
 
 def test_main():
-    expected = ["Flask", "Jinja2", "MarkupSafe", "Werkzeug", "itsdangerous"]
+    expected = ['Flask', 'Jinja2', 'MarkupSafe', 'Werkzeug', 'itsdangerous']
 
     install_dist('Flask')
     for name in expected:

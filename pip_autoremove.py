@@ -1,10 +1,10 @@
 from __future__ import print_function
 
 import optparse
+import runpy
+import sys
 
-import pip
 from pkg_resources import working_set, get_distribution
-
 
 __version__ = '0.9.0'
 
@@ -17,9 +17,22 @@ except NameError:
 WHITELIST = ['pip', 'setuptools']
 
 
+def run_pip(*args):
+    save = sys.argv
+    sys.argv = ['pip']
+    sys.argv.extend(args)
+
+    try:
+        runpy.run_module('pip', run_name='__main__')
+    except SystemExit:
+        pass
+
+    sys.argv = save
+
+
 def autoremove(names, yes=False):
     dead = list_dead(names)
-    if dead and (yes or confirm("Uninstall (y/N)?")):
+    if dead and (yes or confirm('Uninstall (y/N)?')):
         for d in dead:
             remove_dist(d)
 
@@ -80,10 +93,7 @@ def show_dist(dist):
 
 
 def remove_dist(dist):
-    pip.main(['uninstall', '-y', dist.project_name])
-    # Avoid duplicate output caused by pip.logger.consumers being configured
-    # over and over again
-    pip.logger.consumers = []
+    run_pip('uninstall', '-y', dist.project_name)
 
 
 def get_graph():
@@ -130,13 +140,13 @@ def create_parser():
     )
     parser.add_option(
         '-l', '--list', action='store_true', default=False,
-        help="list unused dependencies, but don't uninstall them.")
+        help='list unused dependencies, but don\'t uninstall them.')
     parser.add_option(
         '-L', '--leaves', action='store_true', default=False,
-        help="list leaves (packages which are not used by any others).")
+        help='list leaves (packages which are not used by any others).')
     parser.add_option(
         '-y', '--yes', action='store_true', default=False,
-        help="don't ask for confirmation of uninstall deletions.")
+        help='don\'t ask for confirmation of uninstall deletions.')
     return parser
 
 
